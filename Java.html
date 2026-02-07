@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Java Topics – Grouped Levels</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sidebar:#0f2430;
+      --accent:#14b0ac;
+      --muted:#7b8a90;
+      --card:#ffffff;
+      --bg:#eef6f7;
+      --soft-yellow:#fff8e1;
+      --soft-yellow-border:#ffe8a8;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display:flex;
+      height:100vh;
+      background: #e9f3f5;
+      color: #0b0b0b;
+      overflow:hidden;
+      font-size:13px;
+    }
+
+    .sidebar{
+      width:320px;
+      background:var(--sidebar);
+      color:#e9f7f8;
+      padding:24px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      overflow:auto;
+      box-shadow:4px 0 26px rgba(0,0,0,0.12);
+      flex-shrink:0;
+    }
+    .sidebar h2{
+      margin:0;
+      font-family:Merriweather,serif;
+      color:#3ac4ff;
+      font-size:20px;
+      text-align:center;
+    }
+    #searchBar{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:none;
+      background:#112b31;
+      color:#cfe7e8;
+      outline:none;
+      font-size:13px;
+    }
+
+    .section{
+      margin-top:6px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #121826;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #e6f0f2;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.12s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .section-title:hover {
+      background: #263a54;
+      transform: translateY(-1px);
+    }
+    .section-title.active {
+      background: #3a6073;
+      color: #fff;
+    }
+
+    .section-content {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      padding-left: 6px;
+      margin-top: 8px;
+      padding-bottom: 6px;
+    }
+
+    .topicItem, .subtopicItem {
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #dbe7ea;
+      font-weight: 500;
+      font-size: 11px;
+      transition: background 0.12s, transform 0.12s;
+      background: transparent;
+      display: block;
+    }
+
+    .topicItem:hover, .subtopicItem:hover {
+      background: #1b1b1b;
+      color: #fff;
+      transform: translateX(6px);
+    }
+
+    .topicItem.active, .subtopicItem.active {
+      background: #1b1b1b;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .caret {
+      font-size: 13px;
+      color: #82e6e6;
+      transition: transform 0.18s ease, color 0.12s;
+      user-select: none;
+    }
+    .caret.open {
+      transform: rotate(90deg);
+      color: #ffffff;
+    }
+
+    .content{
+      flex:1;
+      padding:28px 44px;
+      overflow:auto;
+      position:relative;
+    }
+    .page-title{
+      font-family:Merriweather,serif;
+      font-size:28px;
+      margin:0 0 18px;
+      color:#0e3a3a;
+      text-align:left;
+    }
+
+    .info-banner{
+      background:linear-gradient(180deg,var(--soft-yellow), #fff);
+      border-left:5px solid var(--soft-yellow-border);
+      border-radius:12px;
+      box-shadow:0 6px 28px rgba(15,23,42,0.06);
+      display:flex;
+      align-items:flex-start;
+      gap:18px;
+      padding:18px 22px;
+      animation:fadeIn .35s ease;
+      max-width:980px;
+      margin-bottom:18px;
+    }
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none} }
+    .info-text h2{ margin:0; font-family:Merriweather,serif; font-size:18px; color:#db2777; }
+    .info-text p{ margin:8px 0 0; color:#334155; font-size:14px; line-height:1.6; }
+
+    .tab-buttons{ display:flex; gap:12px; margin:18px 0; }
+    .tab-btn{
+      background:rgba(250,250,250,0.95);
+      border:none;
+      padding:9px 16px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:500;
+      color:#0d5858;
+      font-size:14px;
+      box-shadow:0 8px 22px rgba(10,160,160,0.02);
+    }
+    .tab-btn.active{ background:var(--accent); color:#fff; box-shadow:0 14px 26px rgba(10,160,160,0.12) }
+
+    .tab-content{
+      background:var(--card);
+      border-radius:11px;
+      padding:18px;
+      box-shadow:0 10px 36px rgba(15,23,42,0.05);
+      max-width:980px;
+    }
+    .tab-content h3{ margin:0 0 6px; font-family:Merriweather,serif; color:#0f3a3a; font-size:20px; }
+    ul{ margin:11px 0 0 20px; color:#21343a; line-height:1.6; font-size:12px; }
+
+    ::-webkit-scrollbar{ width:10px; height:10px }
+    ::-webkit-scrollbar-thumb{ background:#cbd6d9; border-radius:10px }
+
+    .footer-copy {
+      position: fixed;
+      right: 25px;
+      bottom: 10px;
+      font-size: 10px;
+      font-weight: 500;
+      color: #14b0ac;
+      font-family: 'Inter', sans-serif;
+      opacity: 0.8;
+      transition: opacity 0.3s ease, color 0.3s ease;
+      z-index: 9999;
+    }
+
+    .footer-copy:hover {
+      opacity: 1;
+      color: #14b0ac;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 950px;
+      font-size: 13px;
+      color: #0e2e30;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    table thead {
+      background: #0f3a3a;
+      color: #fff;
+    }
+
+    table th {
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    table td {
+      padding: 8px 12px;
+    }
+
+    table tbody tr {
+      background: #fff;
+      border-bottom: 1px solid #eee;
+    }
+
+    table tbody tr:hover {
+      background: #f0f9ff;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <h2>Java Topics</h2>
+    <input id="searchBar" placeholder="Search topics..." />
+
+    <!-- Foundation -->
+    <div class="section">
+      <div class="section-title" data-section="foundation">
+        <div>Core Java Topics</div>
+        <div class="caret" id="caret-foundation">▶</div>
+      </div>
+      <div class="section-content" id="content-foundation"></div>
+    </div>
+
+    <!-- Core -->
+    <div class="section">
+      <div class="section-title" data-section="core">
+        <div>Intermediate Java Topics</div>
+        <div class="caret" id="caret-core">▶</div>
+      </div>
+      <div class="section-content" id="content-core"></div>
+    </div>
+
+    <!-- Framework -->
+    <div class="section">
+      <div class="section-title" data-section="framework">
+        <div>Advanced Java Topics</div>
+        <div class="caret" id="caret-framework">▶</div>
+      </div>
+      <div class="section-content" id="content-framework"></div>
+    </div>
+
+    <!-- Problem Sets -->
+    <div class="section">
+      <div class="section-title" data-section="problems">
+        <div>Practice Problems</div>
+        <div class="caret" id="caret-problems">▶</div>
+      </div>
+      <div class="section-content" id="content-problems"></div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content">
+    <div id="headerArea" style="text-align:center; margin-bottom:26px;">
+      <div id="mainTitle" class="page-title"
+           style="font-size:20px; font-weight:600; font-family:'Merriweather', serif;
+                  background: linear-gradient(90deg, #1e3a8a, #0ea5e9);
+                  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+                  margin-bottom:14px;">
+        Learn Java Concepts Through Structured Q&A – From Fundamentals to Advanced
+      </div>
+    </div>
+
+    <!-- WELCOME INFO BANNER -->
+    <div id="defaultBanner" class="info-banner">
+      <div class="info-text" style="flex:1;">
+        <h2 style="font-family:'Merriweather',serif; font-size:13px; color:#db2777; margin:0 0 14px;">
+          Welcome to the Java Q&A Portal
+        </h2>
+
+        <ul style="margin:0 0 25px; color:#0e2e30; font-size:12px; line-height:1.8;">
+          <li>This platform helps you <strong>master Java concepts step-by-step</strong> and prepare confidently for <strong>technical interviews</strong>.</li>
+          <li>Explore topics ranging from <strong>core syntax and OOP principles</strong> to <strong>collections, exception handling, file I/O, and multithreading</strong>.</li>
+          <li>Each topic includes <strong>hands-on exercises</strong>, <strong>categorized Q&A</strong>, and <strong>medium / advanced challenges</strong> to strengthen your understanding.</li>
+        </ul>
+
+        <h3 style="color:#7c3aed; font-size:13px; margin-bottom:5px; margin-top:13px; font-weight:600;">
+          How to Use This Hub
+        </h3>
+
+        <ul style="margin:0 0 20px 24px; padding:12px; color:#475569; line-height:1.8; font-size:12px;">
+          <li style="list-style-type:disc;">Choose a topic from the left panel.</li>
+          <li style="list-style-type:disc;">Switch between <strong>Exercise</strong>, <strong>Basic</strong>, <strong>Medium</strong>, and <strong>Advanced</strong> tabs to learn progressively.</li>
+          <li style="list-style-type:disc;">Practice coding examples and build mini-projects to <strong>reinforce your Java skills</strong>.</li>
+        </ul>
+
+        <p style="margin-top: 14px; font-size: 13.5px; color: #0f3a3a; font-weight: 500; line-height: 1.6;">
+          <em><strong>This hub provides a structured, progressive learning path</strong></em> – guiding you from fundamentals to advanced Java concepts with real-world relevance.
+        </p>
+      </div>
+    </div>
+
+    <p id="subtitle" style="margin-top:18px; text-align:center; font-style:italic; font-size:12px; color:#64748b;">
+      A complete step-by-step Java learning and interview preparation guide – covering every concept from beginner to expert level.
+    </p>
+
+    <!-- Tabs -->
+    <div id="tabButtons" class="tab-buttons" style="display:none">
+      <button class="tab-btn active" data-tab="exercise" onclick="showTab('exercise', this)">Exercise</button>
+      <button class="tab-btn" data-tab="basic" onclick="showTab('basic', this)">Basic</button>
+      <button class="tab-btn" data-tab="medium" onclick="showTab('medium', this)">Medium</button>
+      <button class="tab-btn" data-tab="advanced" onclick="showTab('advanced', this)">Advanced</button>
+    </div>
+
+    <div id="tabContent" class="tab-content" style="display:none;"></div>
+  </div>
+
+  <div class="footer-copy">© 2025 Java Q&A Hub | Designed, Developed & Tested by Alekhya Bandu</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ---------- Data (topics + content) ---------- */
+  const topics = {
+"Data Types and Variables": {
+  exercise: [
+    "Declare variables of all primitive types (int, double, char, boolean, long, float, short, byte) and assign values.",
+    "Create non-primitive variables such as String, Array, and custom Object.",
+    "Demonstrate local, instance, and static variables in a class.",
+    "Perform implicit and explicit type casting.",
+    "Swap two numbers using variables.",
+    "Calculate sum, difference, and product of two numbers using variables."
+  ],
+  basic: [
+    "What are primitive data types in Java?",
+    "What are non-primitive data types?",
+    "Difference between local, instance, and static variables.",
+    "What is type casting?",
+    "Difference between implicit and explicit casting.",
+    "What is the scope of a variable?",
+    "What is the lifetime of a variable?",
+    "Can we declare a variable without initializing it?",
+    "What is the default value of instance variables?",
+    "Can static variables be accessed using object reference?"
+  ],
+  medium: [
+    "Swap two numbers using a temporary variable.",
+    "Swap two numbers without a temporary variable.",
+    "Convert int to double and double to int.",
+    "Type casting from byte to int and vice versa.",
+    "Store name, age, and salary using proper variable types.",
+    "Calculate area of rectangle using variables.",
+    "Count number of objects created using static variable.",
+    "Demonstrate local vs instance variable with the same name.",
+    "Declare constants using final keyword.",
+    "Show variable shadowing example in Java."
+  ],
+  advanced: [
+    "Banking application class to hold account balance and perform deposit/withdraw using instance variables.",
+    "Track total number of accounts created using static variables.",
+    "Type-safe method to store different types of test data.",
+    "Read user input dynamically and assign to variables.",
+    "Swap currency values between two accounts.",
+    "Variables usage for logging and reporting in automation.",
+    "Dynamically change salary variable using type casting.",
+    "Handle multiple configurations (URL, username, password) in automation framework.",
+    "Calculate sum and average of multiple integer variables representing test scores.",
+    "Demonstrate variable scope in multi-threaded environment."
+  ]
+},
+
+"Operators": {
+  exercise: [
+    "Write a program to perform addition, subtraction, multiplication, division, and modulus on two numbers using arithmetic operators.",
+    "Use relational operators to compare two numbers and print true/false.",
+    "Implement logical operators (AND, OR, NOT) with boolean variables.",
+    "Demonstrate assignment operators ( =, +=, -=, *=, /=, %= ).",
+    "Use increment (++) and decrement (--) operators in expressions.",
+    "Implement the ternary operator to assign maximum of two numbers.",
+    "Combine multiple operators in one expression and evaluate precedence."
+  ],
+  basic: [
+    "What are operators in Java?",
+    "Name different types of operators.",
+    "What is the difference between arithmetic and relational operators?",
+    "What is the difference between logical AND and OR?",
+    "Difference between prefix and postfix increment operators.",
+    "What is a ternary operator?",
+    "What is operator precedence?",
+    "Difference between == and =.",
+    "What are assignment operators?",
+    "Can you use arithmetic operators with boolean values?"
+  ],
+  medium: [
+    "Write a program to find the largest of three numbers using arithmetic and relational operators.",
+    "Write a program to check if a number is divisible by 3 and 5 using logical operators.",
+    "Use ternary operator to assign grades based on marks.",
+    "Demonstrate operator precedence with a complex arithmetic expression.",
+    "Swap two numbers using arithmetic operators.",
+    "Implement compound assignment operators in a program.",
+    "Create a program to toggle boolean values using logical NOT.",
+    "Use increment/decrement operators in a for loop to calculate sum of numbers.",
+    "Write a program to compare two strings using relational operators (== vs equals()).",
+    "Demonstrate short-circuiting with logical operators."
+  ],
+  advanced: [
+    "Design a calculator program that supports multiple operations using arithmetic and assignment operators.",
+    "Evaluate a complex expression with mixed operators, and explain step-by-step evaluation.",
+    "Implement a scoring system in a game using compound assignment operators.",
+    "Use logical operators to validate multiple conditions in a login form.",
+    "Implement salary bonus calculation based on multiple conditions using ternary and logical operators.",
+    "Demonstrate operator precedence bugs in a real-world calculation and fix them.",
+    "Use increment/decrement operators in multi-threaded scenario safely.",
+    "Validate multiple user inputs in automation using logical operators.",
+    "Swap multiple variable values in a single expression.",
+    "Combine relational, logical, and arithmetic operators to dynamically calculate test results."
+  ]
+},
+
+"Control Statements": {
+  exercise: [
+    "Write a program using if and if-else to check whether a number is positive, negative, or zero.",
+    "Use nested if statements to find the largest of three numbers.",
+    "Implement a program using switch statement to print day names based on day number.",
+    "Write a for loop to print numbers from 1 to 20.",
+    "Write a while loop to calculate sum of first 50 numbers.",
+    "Use do-while loop to repeatedly ask user input until they enter a valid number.",
+    "Demonstrate the use of break and continue in loops.",
+    "Use enhanced for loop to traverse an array of integers."
+  ],
+  basic: [
+    "What are control statements in Java?",
+    "What is the difference between conditional statements and loops?",
+    "Difference between if and if-else.",
+    "Difference between switch and if-else.",
+    "Difference between for, while, and do-while loops.",
+    "What is the use of break in loops?",
+    "What is the use of continue in loops?",
+    "What is an enhanced for loop?",
+    "Difference between pre-test and post-test loops.",
+    "When should you use a switch statement instead of if-else?"
+  ],
+  medium: [
+    "Write a program to check whether a number is even or odd using if-else.",
+    "Write a program to find the largest of four numbers using nested if.",
+    "Implement a menu-driven program using switch to perform basic arithmetic operations.",
+    "Use for loop to print multiplication table of a given number.",
+    "Use while loop to reverse a number.",
+    "Write a program using do-while to validate user input within a range.",
+    "Demonstrate break in a loop to exit when a condition is met.",
+    "Demonstrate continue to skip even numbers in a loop.",
+    "Traverse an array using enhanced for loop and print all elements.",
+    "Combine if-else and loops to find prime numbers between 1 and 100."
+  ],
+  advanced: [
+    "Implement a login system that allows maximum 3 attempts using loops and if-else.",
+    "Create a program to validate user input for multiple conditions using nested if-else and logical operators.",
+    "Implement a small calculator with menu options using switch and loops.",
+    "Use break to exit from nested loops in a matrix traversal.",
+    "Use continue in real-world scenario: skip invalid test data while iterating over a list.",
+    "Use loops to generate a pattern (e.g., pyramid of numbers or stars).",
+    "Validate multiple form fields using if-else and switch in a simulated automation scenario.",
+    "Implement a voting eligibility check using conditional statements.",
+    "Detect leap years between 1900 and 2100 using loops and if-else.",
+    "Traverse multi-dimensional arrays using nested loops and apply break/continue based on condition."
+  ]
+},
+
+"Arrays": {
+  exercise: [
+    "Declare and initialize a single-dimensional array of integers and print all elements.",
+    "Declare and initialize a multi-dimensional array (2D array) and print all elements.",
+    "Find the length of an array.",
+    "Traverse an array using for loop and enhanced for loop.",
+    "Insert a new element at a specific index.",
+    "Update an element at a specific index.",
+    "Delete an element from a specific index.",
+    "Reverse the elements of an array.",
+    "Find the largest and smallest element in an array.",
+    "Calculate the sum and average of array elements."
+  ],
+  basic: [
+    "What is an array in Java?",
+    "Difference between single-dimensional and multi-dimensional arrays.",
+    "How to find the length of an array?",
+    "Can arrays hold multiple data types?",
+    "Difference between array and ArrayList.",
+    "How do you traverse an array?",
+    "What is an enhanced for loop?",
+    "Can array size be changed after creation?",
+    "What is the default value of array elements?",
+    "Difference between shallow and deep copy of arrays."
+  ],
+  medium: [
+    "Write a program to reverse an array.",
+    "Find the largest and smallest element in an array.",
+    "Calculate sum and average of array elements.",
+    "Search for an element in an array (linear search).",
+    "Sort an array in ascending order using bubble sort.",
+    "Merge two arrays into a single array.",
+    "Insert a new element at a specific index.",
+    "Delete an element from a specific index.",
+    "Traverse a 2D array and print elements in matrix form.",
+    "Transpose a 2D array."
+  ],
+  advanced: [
+    "Implement a real-world scenario: store employee salaries in an array and calculate total payroll.",
+    "Remove duplicate values from an array.",
+    "Implement a program to rotate array elements by n positions.",
+    "Use arrays to track multiple test case results (pass/fail) in automation.",
+    "Find second largest element in an array.",
+    "Create a program to dynamically add user inputs into an array until a sentinel value is entered.",
+    "Compare two arrays to check if they contain the same elements.",
+    "Calculate median of numbers stored in an array.",
+    "Use arrays to simulate a simple inventory management system.",
+    "Traverse a multi-dimensional array and apply a condition to filter elements (e.g., print even numbers only)."
+  ]
+},
+
+"Methods / Functions": {
+  exercise: [
+    'Create a simple method to print "Hello World".',
+    "Create a method with parameters to add two numbers and return the result.",
+    "Create a method to find the factorial of a number.",
+    "Create a method to check if a number is prime.",
+    "Demonstrate method overloading by creating multiple add methods with different parameter types.",
+    "Create a method that calls another method (method chaining).",
+    "Demonstrate recursion by writing a method to calculate Fibonacci numbers.",
+    "Pass an array to a method and print all elements.",
+    "Return multiple values from a method using an array or object.",
+    "Demonstrate pass by value using primitive and reference types."
+  ],
+  basic: [
+    "What is a method in Java?",
+    "Difference between void and non-void methods.",
+    "What is method overloading?",
+    "Difference between pass by value and pass by reference.",
+    "What is recursion?",
+    "What are parameters and arguments?",
+    "Can methods call themselves?",
+    "What is the return type of a method?",
+    "Difference between static and instance methods.",
+    "Can methods throw exceptions?"
+  ],
+  medium: [
+    "Write a method to reverse a string.",
+    "Write a method to check if a string is a palindrome.",
+    "Write a method to calculate the sum of elements in an array.",
+    "Overload a method to handle int, double, and float inputs.",
+    "Write a recursive method to calculate factorial.",
+    "Write a method to find the maximum value in an array.",
+    "Demonstrate method chaining with multiple methods.",
+    "Pass an object to a method and modify its attributes.",
+    "Write a method to merge two arrays.",
+    "Create a method to print a pattern of stars or numbers."
+  ],
+  advanced: [
+    "Implement a calculator program using methods for add, subtract, multiply, divide.",
+    "Write a program to simulate a banking system where methods handle deposit, withdraw, and balance check.",
+    "Use methods to validate multiple user inputs in a registration form.",
+    "Implement recursive method to traverse a multi-level menu structure.",
+    "Use method overloading in a real-world scenario: process different types of payments.",
+    "Implement a method that tracks test case execution status and returns results.",
+    "Write a method to calculate statistics (average, min, max) for a list of numbers.",
+    "Demonstrate pass by reference scenario with objects in a project simulation.",
+    "Use methods to modularize Selenium test steps for different web pages.",
+    "Implement a method that dynamically reads configuration values and returns them to caller."
+  ]
+},
+
+"Strings": {
+  exercise: [
+    "Declare and initialize a String and print it.",
+    "Concatenate two strings using + operator and concat method.",
+    "Find the length of a string.",
+    "Convert string to uppercase and lowercase.",
+    "Compare two strings using equals and ==.",
+    "Check if a string contains a substring.",
+    "Extract substring using substring method.",
+    "Split a string based on a delimiter.",
+    "Reverse a string.",
+    "Convert string to StringBuilder and modify it.",
+    "Convert string to char array and iterate.",
+    "Trim spaces from a string.",
+    "Replace a character or substring in a string.",
+    "Demonstrate immutability of strings.",
+    "Count vowels and consonants in a string."
+  ],
+  basic: [
+    "What is a string in Java?",
+    "Difference between String and StringBuilder.",
+    "What is immutability in strings?",
+    "Difference between == and equals() for strings.",
+    "How to get length of a string?",
+    "Difference between concat and + operator.",
+    "What does substring method do?",
+    "How to convert string to uppercase and lowercase?",
+    "How to trim spaces in string?",
+    "How to check if a string contains a word or character?"
+  ],
+  medium: [
+    "Reverse a string using a loop.",
+    "Reverse a string using StringBuilder.",
+    "Count occurrences of a character in a string.",
+    "Split a string by comma and print each element.",
+    "Replace all vowels in a string with *.",
+    "Compare two strings ignoring case.",
+    "Check if a string is a palindrome.",
+    "Convert a string to an array of characters and print.",
+    "Find first and last index of a character in a string.",
+    "Remove duplicate characters from a string."
+  ],
+  advanced: [
+    "Validate user input using string methods (e.g., check email format).",
+    "Count frequency of each word in a sentence.",
+    "Reverse words in a sentence.",
+    "Mask sensitive information (e.g., credit card number) in a string.",
+    "Implement case-insensitive search in a string array.",
+    "Extract numbers from a string containing letters and digits.",
+    "Real-world project scenario: parse test data from CSV lines.",
+    "Demonstrate immutable behavior in multi-threaded environment.",
+    "Replace multiple substrings based on mapping in automation scripts.",
+    "Implement method to check if two strings are anagrams."
+  ]
+},
+
+"Classes and Objects": {
+  exercise: [
+    "Create a class Car with fields brand, model, year.",
+    "Create objects of the class Car and print their details.",
+    "Add methods start, stop, and displayDetails to the class.",
+    "Create multiple objects and call methods on them.",
+    "Demonstrate default and parameterized constructors.",
+    "Modify object properties using setter methods."
+  ],
+  basic: [
+    "What is a class in Java?",
+    "What is an object?",
+    "Difference between class and object.",
+    "How to create an object of a class?",
+    "What is a constructor?",
+    "Difference between default and parameterized constructor.",
+    "What are instance variables?",
+    "What are methods?",
+    "What is the difference between object reference and object?",
+    "Can multiple objects share the same class?"
+  ],
+  medium: [
+    "Write a class Student with fields name, age, rollNumber and methods to display details.",
+    "Create multiple objects of Student and print details.",
+    "Implement a method to calculate average marks for a student.",
+    "Modify object state using setter methods.",
+    "Demonstrate object creation using new keyword.",
+    "Create an object array to store multiple Car objects.",
+    "Access object fields using object references.",
+    "Call methods of one object from another object.",
+    "Implement a simple BankAccount class with deposit and withdraw methods.",
+    "Demonstrate default constructor and parameterized constructor in one class."
+  ],
+  advanced: [
+    "Implement a real-world scenario: Online shopping product class with objects for multiple products.",
+    "Track multiple employee objects with salary calculation methods.",
+    "Demonstrate object cloning using clone method.",
+    "Use objects to manage multiple test case results.",
+    "Create objects dynamically based on user input.",
+    "Implement a library management system using objects for books.",
+    "Show object references pointing to the same object and modifying fields.",
+    "Demonstrate object comparison using equals method.",
+    "Implement a simulation of multiple bank accounts and transactions.",
+    "Use objects in multi-threaded environment to track shared resources."
+  ]
+},
+
+"OOP Concepts – Inheritance, Polymorphism, Abstraction, Encapsulation": {
+  exercise: [
+    "Create a class Vehicle with methods startEngine and stopEngine.",
+    "Extend Vehicle with classes Car and Bike and override startEngine.",
+    "Create abstract class Employee with abstract method calculateSalary. Extend with PermanentEmployee and ContractEmployee.",
+    "Create interface Drawable with method draw and implement in Circle and Rectangle.",
+    "Create BankAccount class with private fields accountNumber and balance and provide getters/setters.",
+    "Demonstrate polymorphism using parent class references."
+  ],
+  basic: [
+    "What is Object-Oriented Programming?",
+    "What are the four pillars of OOP?",
+    "What is inheritance?",
+    "What is polymorphism?",
+    "Difference between compile-time and runtime polymorphism.",
+    "What is abstraction?",
+    "What is encapsulation?",
+    "Difference between abstract class and interface.",
+    "How to override methods?",
+    "How to overload methods?"
+  ],
+  medium: [
+    "Demonstrate method overriding with Vehicle and Car.",
+    "Demonstrate method overloading.",
+    "Implement abstract class and concrete class.",
+    "Implement interface and multiple classes.",
+    "Call child methods using parent reference (polymorphism).",
+    "Constructor chaining from parent to child.",
+    "Encapsulate class fields and access via getters/setters.",
+    "Interface with multiple concrete implementations.",
+    "Abstract method usage in multiple child classes.",
+    "Class hierarchy for employee types."
+  ],
+  advanced: [
+    "Design POM using inheritance to avoid code duplication.",
+    "Runtime polymorphism for multiple page types.",
+    "Encapsulation to secure test data.",
+    "Abstract Page class for Selenium framework.",
+    "Combine abstraction and polymorphism to reduce duplicate code.",
+    "Method overriding fails if signature mismatch – explain and demonstrate.",
+    "Reusable utility methods using inheritance and polymorphism.",
+    "Class hierarchy for user roles in a banking system.",
+    "Implement polymorphism in multi-page automation.",
+    "Design a real-world project scenario using all OOP concepts."
+  ]
+},
+
+"Constructor Overloading / Chaining": {
+  exercise: [
+    "Create a class Book with default constructor and parameterized constructor.",
+    "Demonstrate constructor overloading with multiple parameters.",
+    "Use this() to call another constructor in the same class.",
+    "Use super() to call parent class constructor.",
+    "Create multiple objects using different constructors.",
+    "Track object initialization flow using print statements."
+  ],
+  basic: [
+    "What is a constructor?",
+    "Difference between default and parameterized constructor.",
+    "What is constructor overloading?",
+    "What is constructor chaining?",
+    "Difference between this() and super().",
+    "Can constructors return values?",
+    "Can constructors be private?",
+    "Difference between constructor and method.",
+    "When is constructor called?",
+    "Can a class have multiple constructors?"
+  ],
+  medium: [
+    "Demonstrate constructor overloading in Book class.",
+    "Use this() to call another constructor.",
+    "Call parent class constructor using super().",
+    "Track object initialization sequence in a hierarchy.",
+    "Initialize multiple objects with different constructors.",
+    "Combine constructor overloading with method overloading.",
+    "Use constructor to set default values for fields.",
+    "Demonstrate chaining between multiple constructors.",
+    "Pass objects as parameters to constructors.",
+    "Create constructors for multiple classes in a hierarchy."
+  ],
+  advanced: [
+    "Real-world scenario: initialize employee objects with different sets of data.",
+    "Initialize test configuration objects dynamically using overloaded constructors.",
+    "Implement chaining in multi-level inheritance scenario.",
+    "Track creation of Selenium page objects using constructors.",
+    "Demonstrate constructor-based dependency injection in small project simulation.",
+    "Use overloaded constructors for multiple test data sets.",
+    "Constructor chaining in parent-child project hierarchy.",
+    "Use constructors to create multiple configuration profiles.",
+    "Simulate bank account objects with different initialization parameters.",
+    "Create reusable utility objects using constructor chaining."
+  ]
+},
+
+"This & Super Keywords": {
+  exercise: [
+    "Use this to refer to instance variables inside a class.",
+    "Use this() to call another constructor in the same class.",
+    "Use this to pass the current object as parameter to a method.",
+    "Use super to access parent class methods.",
+    "Use super() to call parent class constructor.",
+    "Override a parent method and call it using super.methodName()."
+  ],
+  basic: [
+    "What is this keyword?",
+    "What is super keyword?",
+    "Difference between this and super.",
+    "When is this() used?",
+    "When is super() used?",
+    "Can this be used in static methods?",
+    "Can super be used in static context?",
+    "Difference between super and parent class reference.",
+    "Can we chain constructors using this and super together?",
+    "What is the role of super in method overriding?"
+  ],
+  medium: [
+    "Demonstrate this to refer to instance variable.",
+    "Use this() to call another constructor.",
+    "Pass current object using this as parameter.",
+    "Call parent class method using super.",
+    "Call parent class constructor using super().",
+    "Override method and access parent method with super.",
+    "Demonstrate this in multiple constructors.",
+    "Access parent fields using super.",
+    "Use super in multi-level inheritance.",
+    "Show difference between this and super in object reference."
+  ],
+  advanced: [
+    "Real-world scenario: page object inheritance in Selenium framework using super.",
+    "Track current object properties with this for test reporting.",
+    "Constructor chaining across parent-child classes in project simulation.",
+    "Use this to pass test data objects between methods.",
+    "Demonstrate super to reuse common test methods in base class.",
+    "Override framework utility methods and call base implementation using super.",
+    "Simulate multi-level employee hierarchy using super.",
+    "Use this to maintain current user session object.",
+    "Track object initialization in multi-level inheritance.",
+    "Demonstrate combining this and super for reusable automation utilities."
+  ]
+},
+
+"Collections Framework": {
+  exercise: [
+    "Create an ArrayList of integers, add elements, and print them.",
+    "Create a LinkedList of strings, add elements, and traverse.",
+    "Create a HashSet of integers and demonstrate that duplicates are not allowed.",
+    "Create a TreeSet and observe natural ordering.",
+    "Create a HashMap of key-value pairs and retrieve values.",
+    "Iterate through HashMap using entrySet().",
+    "Sort ArrayList of integers using Collections.sort().",
+    "Remove elements from ArrayList and LinkedList.",
+    "Use contains() method for List and Set.",
+    "Convert ArrayList to array and vice versa."
+  ],
+  basic: [
+    "What is Collections Framework?",
+    "Difference between List, Set, and Map.",
+    "What is ArrayList?",
+    "What is LinkedList?",
+    "Difference between HashSet and TreeSet.",
+    "What is HashMap?",
+    "Difference between HashMap and TreeMap.",
+    "Can Collections hold duplicates?",
+    "What is the default ordering in TreeSet?",
+    "How to iterate through a collection?"
+  ],
+  medium: [
+    "Write a program to find the maximum and minimum in an ArrayList.",
+    "Sort a LinkedList of strings alphabetically.",
+    "Remove duplicates from a List using Set.",
+    "Merge two ArrayLists.",
+    "Search for a key in HashMap and retrieve value.",
+    "Update a value in HashMap.",
+    "Traverse HashSet using iterator.",
+    "Reverse an ArrayList using Collections.reverse().",
+    "Count occurrences of elements in a List.",
+    "Convert Set to List and sort it."
+  ],
+  advanced: [
+    "Real-world scenario: store employee objects in ArrayList and sort by salary.",
+    "Maintain unique test case IDs using HashSet.",
+    "Map test case names to execution results using HashMap.",
+    "Implement priority tasks using TreeSet.",
+    "Remove failed test cases from List dynamically.",
+    "Merge multiple test data sets into one List.",
+    "Store multiple users with roles in Map and access by username.",
+    "Demonstrate thread-safe collection access using Collections.synchronizedList().",
+    "Implement caching of configuration data using HashMap.",
+    "Sort objects by multiple attributes using Comparator."
+  ]
+},
+
+"Exception Handling": {
+  exercise: [
+    "Write a program to divide two numbers and handle ArithmeticException. Use finally to close resources.",
+    "Create method validateAge(int age) that throws custom AgeException if age < 18. Call the method from main and handle exception.",
+    "Write programs to handle IOException (checked) and NullPointerException (unchecked).",
+    "Create InvalidUserInputException class that extends Exception. Throw it when user enters invalid input."
+  ],
+  basic: [
+    "What is exception handling?",
+    "What is the purpose of try, catch, finally?",
+    "What happens if an exception is not caught?",
+    "Difference between checked and unchecked exceptions?",
+    "What is a runtime exception?",
+    "What is the difference between throw and throws?",
+    "Can a method throw multiple exceptions?",
+    "Can throw be used outside method?",
+    "Can throws handle unchecked exceptions?",
+    "What is exception propagation?",
+    "What is a checked exception? Give examples.",
+    "What is an unchecked exception? Give examples.",
+    "Why does Java distinguish them?",
+    "Which exceptions are compile-time and which runtime?"
+  ],
+  medium: [
+    "How to handle multiple exceptions in a single try block?",
+    "What is nested try-catch?",
+    "Difference between try-finally and try-catch-finally?",
+    "How to propagate exception to caller?",
+    "Difference between throw and throws?",
+    "Difference between checked and unchecked exceptions.",
+    "How does JVM handle uncaught exceptions?",
+    "Why use throws in method signature?",
+    "How to chain multiple throws in a method?",
+    "What is exception rethrowing?"
+  ],
+  advanced: [
+    "Real-time: Handle file reading in Selenium framework, close file in finally block.",
+    "Catch multiple exceptions like IOException, FileNotFoundException.",
+    "Log exception details in log file for debugging.",
+    "Ensure that DB connection or WebDriver is closed in finally block even after failure.",
+    "Real-time: In automation framework, create a utility method getElementText() that throws NoSuchElementException if element not found.",
+    "Use throws in method signature.",
+    "Handle exception in test case to continue execution without failing whole suite.",
+    "Real-time: Handle API call response parsing in automation framework.",
+    "Checked exception for network issues.",
+    "Unchecked exception for null JSON response.",
+    "Log both types separately and fail test gracefully.",
+    "Real-time: In Selenium framework, create ElementNotInteractableException extending RuntimeException.",
+    "Throw this when a button is disabled.",
+    "Handle exception in test flow to retry clicking the element with wait.",
+    "Log message and screenshot for debugging."
+  ]
+},
+
+"File Handling": {
+  exercise: [
+    "Write a program to read a text file and write its content into another file.",
+    "Read a file line by line using BufferedReader and write processed content to another file using BufferedWriter.",
+    "Create config.properties file with key-value pairs and read them in Java program.",
+    "Read CSV file containing test data, parse columns, and use in Selenium test. Write logs to a text file."
+  ],
+  basic: [
+    "What is FileReader and FileWriter?",
+    "Difference between character and byte streams?",
+    "How to open and close files?",
+    "What exceptions are thrown while reading/writing files?",
+    "How to handle file not found?",
+    "What is BufferedReader/BufferedWriter?",
+    "Why use buffered streams?",
+    "Difference between read() and readLine()?",
+    "How to improve file I/O performance?",
+    "How to close streams properly?",
+    "What is a properties file?",
+    "How to load and read properties?"
+  ],
+  medium: [
+    "How to read large files efficiently?",
+    "Difference between FileReader/FileWriter and BufferedReader/BufferedWriter?",
+    "How to append content to a file?",
+    "How to handle encoding issues?",
+    "Difference between read() and readLine()?",
+    "How to handle multiple file formats?",
+    "How to combine FileReader/FileWriter with BufferedReader/BufferedWriter?",
+    "How to skip lines or read selectively?",
+    "How to handle end-of-file efficiently?",
+    "What is the difference between flush() and close()?"
+  ],
+  advanced: [
+    "Real-time: In automation framework, read test data from CSV file and write test results to a log file.",
+    "Handle exceptions like IOException, ensure resources are closed in finally block.",
+    "Read large data efficiently for multiple test iterations.",
+    "Real-time: In automation framework, read dynamic test data from CSV or text file.",
+    "Write execution status (Pass/Fail) to separate log file.",
+    "Ensure thread-safe access when running parallel tests."
+  ]
+},
+
+"Multithreading": {
+  exercise: [
+    "Create two threads: one by extending Thread class and another by implementing Runnable. Print numbers 1–10 from each thread.",
+    "Create a thread and print its state transitions: NEW, RUNNABLE, RUNNING, WAITING, TIMED_WAITING, TERMINATED.",
+    "Create a shared counter accessed by multiple threads. Use synchronized keyword to avoid race conditions.",
+    "Create a fixed thread pool using ExecutorService and execute multiple Runnable tasks concurrently.",
+    "Create two threads trying to acquire two locks in different order to simulate deadlock. Resolve it using proper lock ordering or timeout."
+  ],
+  basic: [
+    "What is a thread?",
+    "Difference between Thread class and Runnable interface?",
+    "How to start a thread?",
+    "Difference between start() and run()?",
+    "Can multiple threads share the same Runnable object?",
+    "What are the states of a thread?",
+    "How to check thread state?",
+    "What is the difference between WAITING and TIMED_WAITING?",
+    "What happens when a thread terminates?",
+    "Can a terminated thread be restarted?"
+  ],
+  medium: [
+    "How to pass parameters to threads?",
+    "Difference between extending Thread vs implementing Runnable in terms of memory?",
+    "How to stop a thread safely?",
+    "Difference between sleep() and yield()?",
+    "How does thread scheduler work?",
+    "Difference between user threads and daemon threads?",
+    "How to implement thread priorities?",
+    "How to use join() method?"
+  ],
+  advanced: [
+    "Real-time: In automation framework, run multiple test cases concurrently using Runnable. Assign different test modules to separate threads. Handle proper synchronization when accessing shared WebDriver or test data.",
+    "Real-time: Implement a scenario where Selenium tests run with multiple threads. Use join() to wait for high-priority modules to finish before proceeding to dependent modules. Monitor thread states for debugging.",
+    "Real-time: In automation framework, multiple threads update shared test result logs. Use synchronization to prevent corrupted log entries. Implement thread-safe methods for DB updates or API call validations.",
+    "Real-time: In automation framework, execute multiple Selenium test modules using thread pool. Each thread executes a separate browser session. Ensure proper shutdown after test execution. Handle exceptions in threads gracefully.",
+    "Real-time: In automation framework, multiple threads access shared WebDriver or test data. Simulate race conditions for updating test results. Use synchronized blocks or locks to prevent inconsistent data. Implement logging for deadlock detection."
+  ]
+}
+  };
+  
+  const problemTables = {
+  "Basic Logic Practice": [
+    ["Print statements & variables","Print 'Hello'","Sum of two numbers","Print name & age"],
+    ["Loops","Print 1-10","Even numbers","Multiplication table"],
+    ["Conditionals","Check odd/even","Largest of 3 numbers","Leap year"],
+    ["Strings","Reverse string","Count vowels","Palindrome check"],
+    ["Arrays","Print array elements","Find max/min","Sum of array"],
+    ["Patterns","Right triangle","Pyramid of *","Inverted pattern"],
+  ],
+  "Intermediate Logic Practice": [
+    ["Array logic","Count even numbers","Print unique numbers","Remove duplicates"],
+    ["String logic","Count words","Find character frequency","Compare strings"],
+    ["Functions","Function for sum","Factorial","Reverse number"],
+    ["Input/Output practice","Read N numbers","Print total","Print average"],
+    ["Nested loops","Find prime numbers","Print patterns","Factorial of N"],
+    ["Edge cases","Handle empty strings","Handle negative numbers","Handle null input"],
+  ],
+  "Advanced Logic Practice": [
+    ["Lists & Collections","Use ArrayList add","Remove elements","Search elements"],
+    ["HashMap","Count frequency of items","Find duplicates","Map key-value practice"],
+    ["Sorting & Searching","Sort array","Binary search","Find min/max"],
+    ["Logic with conditions","Find 2nd largest","Merge arrays","Check divisibility"],
+    ["Debugging","Fix broken code","Analyze errors","Trace output"],
+    ["Mini project","Combine inputs","Calculate total salary","Calculate score"],
+  ],
+  "Automation & File Handling Practice": [
+    ["File handling","Read text file","Write text file","Append to file"],
+    ["Exception handling","Divide by zero","Handle file not found","Handle input mismatch"],
+    ["Java OOP","Create Employee class","Add methods","Instantiate objects"],
+    ["Automation-style","Read data from Excel","Calculate test pass rate","Log output"],
+    ["API-style","Parse JSON string","Extract key-values","Print formatted output"],
+    ["SQL logic","Filter data using Java","List unique entries","Count rows"],
+    ["Mini project","Read student marks","Process data","Print result"],
+  ]
+};
+
+  /* short descriptions for banners */
+  const descriptions = {
+    "Data Types and Variables": "Primitive and non-primitive types, variable scope, and type casting fundamentals in Java – the basis for all programs.",
+    "Operators": "Arithmetic, relational, logical, assignment and ternary operators – build expressions and control logic.",
+    "Control Statements": "Conditionals and loops used to branch and repeat logic in Java programs.",
+    "Arrays": "Single and multi-dimensional arrays plus common array operations and traversals.",
+    "Methods / Functions": "Method declaration, arguments, return types, overloading and recursion.",
+    "Strings": "String handling, immutability, StringBuilder/StringBuffer and common string operations.",
+    "Classes and Objects": "Building blocks of Java OOP – define classes, create objects and manage state with methods.",
+    "OOP Concepts – Inheritance, Polymorphism, Abstraction, Encapsulation": "Core object-oriented principles to design modular, maintainable applications.",
+    "Constructor Overloading / Chaining": "Multiple constructors and chaining via this() and super().",
+    "This & Super Keywords": "Keywords to refer to current and parent-class members and constructors.",
+    "Collections Framework": "Lists, Sets, Maps and utilities for storing/managing groups of objects.",
+    "Exception Handling": "try/catch/throw/throws and building robust error-handling.",
+    "File Handling": "File I/O, properties, CSV processing and configuration reading.",
+    "Multithreading": "Concurrency fundamentals: threads, synchronization, ExecutorService and race conditions.",
+    "Basic Logic Practice": "Focus on simple foundational logic problems — learn to use variables, loops, conditionals, arrays, and strings. Build confidence in writing small programs and understanding basic flow control.",
+    "Intermediate Logic Practice": "Strengthen your logic with functions, nested loops, and edge-case handling. Practice moderate challenges involving arrays, strings, and input/output to improve structured thinking.",
+    "Advanced Logic Practice": "Solve real-world coding tasks using collections, sorting, HashMap, and debugging exercises. Combine multiple concepts, simulate automation-style logic, and prepare for interview-level coding questions.",
+    "Automation & File Handling Practice": "Apply Java concepts in automation and data-driven contexts — work with files, exceptions, OOP, and APIs. Build mini-projects that read and process real-time data, mimicking automation framework behavior."
+  };
+
+  /* ---------- Sidebar lists ---------- */
+  const foundationList = [
+    "Data Types and Variables",
+    "Operators",
+    "Control Statements",
+    "Arrays",
+    "Methods / Functions",
+    "Strings"
+  ];
+
+  const coreList = [
+    "Classes and Objects",
+    "OOP Concepts – Inheritance, Polymorphism, Abstraction, Encapsulation",
+    "Constructor Overloading / Chaining",
+    "This & Super Keywords"
+  ];
+
+  const frameworkList = [
+    "Collections Framework",
+    "Exception Handling",
+    "File Handling",
+    "Multithreading"
+  ];
+  
+  const problemsList = [
+    "Basic Logic Practice",
+    "Intermediate Logic Practice",
+    "Advanced Logic Practice",
+    "Automation & File Handling Practice"
+  ];
+
+  /* --- Helpers --- */
+  function createListItem(text, cls = 'topicItem') {
+    const d = document.createElement('div');
+    d.className = cls;
+    d.textContent = text;
+    d.addEventListener('click', ev => {
+      ev.stopPropagation();
+      loadTopic(text);
+      document.querySelectorAll('.topicItem, .subtopicItem').forEach(i => i.classList.remove('active'));
+      d.classList.add('active');
+    });
+    return d;
+  }
+
+  function populate(container, list, cls = 'topicItem') {
+    container.innerHTML = '';
+    list.forEach(item => container.appendChild(createListItem(item, cls)));
+  }
+
+  /* --- Populate sidebar --- */
+  const contFoundation = document.getElementById('content-foundation');
+  const contCore = document.getElementById('content-core');
+  const contFramework = document.getElementById('content-framework');
+  const contProblems = document.getElementById('content-problems');
+
+  populate(contFoundation, foundationList);
+  populate(contCore, coreList);
+  populate(contFramework, frameworkList);
+  populate(contProblems, problemsList);
+
+  /* --- Toggle logic --- */
+  function toggleSection(id) {
+    ['foundation','core','framework','problems'].forEach(sec=>{
+      const c=document.getElementById('content-'+sec);
+      const caret=document.getElementById('caret-'+sec);
+      const title=document.querySelector('.section-title[data-section="'+sec+'"]');
+      if(sec!==id){c.style.display='none';caret.classList.remove('open');title.classList.remove('active');}
+    });
+    const c=document.getElementById('content-'+id);
+    const caret=document.getElementById('caret-'+id);
+    const title=document.querySelector('.section-title[data-section="'+id+'"]');
+    const show=c.style.display==='none'||c.style.display==='';
+    c.style.display=show?'block':'none';
+    caret.classList.toggle('open',show);
+    title.classList.toggle('active',show);
+
+    const allClosed = ['foundation','core','framework','problems'].every(sec=>{
+      const el=document.getElementById('content-'+sec);
+      return !el || el.style.display==='none' || el.style.display==='';
+    });
+    if(allClosed){
+      document.getElementById('mainTitle').textContent = "Learn Java Concepts Through Structured Q&A – From Fundamentals to Advanced";
+      document.getElementById('defaultBanner').style.display='flex';
+      document.getElementById('subtitle').style.display='block';
+      document.getElementById('tabButtons').style.display='none';
+      document.getElementById('tabContent').style.display='none';
+      const topicInfo = document.querySelector('.info-banner.topic');
+      if(topicInfo) topicInfo.remove();
+      document.querySelectorAll('.topicItem, .subtopicItem').forEach(i => i.classList.remove('active'));
+    }
+  }
+
+  document.querySelectorAll('.section-title').forEach(t=>t.addEventListener('click',()=>toggleSection(t.dataset.section)));
+
+  /* ---------- Generate Problem Table ---------- */
+  function generateProblemTable(name) {
+    const rows = problemTables[name] || [];
+    if (rows.length === 0) return "<p>No problems found.</p>";
+
+    let color = "#0f3a3a";
+    if (name.includes("Basic")) color = "#1b8a5a";
+    else if (name.includes("Intermediate")) color = "#d97706";
+    else if (name.includes("Advanced")) color = "#2563eb";
+    else if (name.includes("Automation")) color = "#9333ea";
+
+    let html = `
+    <table style="border-collapse:collapse;width:100%;max-width:950px;
+                  font-size:13px;color:#0e2e30;
+                  box-shadow:0 5px 20px rgba(0,0,0,0.05);
+                  border-radius:10px;overflow:hidden;margin-top:10px;">
+      <thead style="background:${color};color:#fff;">
+        <tr>
+          <th style="padding:10px 12px;text-align:left;">Focus</th>
+          <th style="padding:10px 12px;text-align:left;">Problem 1</th>
+          <th style="padding:10px 12px;text-align:left;">Problem 2</th>
+          <th style="padding:10px 12px;text-align:left;">Problem 3</th>
+        </tr>
+      </thead>
+      <tbody>
+    `;
+
+    rows.forEach(r => {
+      html += `
+        <tr style="background:#fff;border-bottom:1px solid #eee;">
+          <td style="padding:8px 12px;font-weight:600;">${r[0]}</td>
+          <td style="padding:8px 12px;">${r[1]}</td>
+          <td style="padding:8px 12px;">${r[2]}</td>
+          <td style="padding:8px 12px;">${r[3]}</td>
+        </tr>`;
+    });
+
+    html += "</tbody></table>";
+    return html;
+  }
+
+  /* --- Topic rendering --- */
+  let currentTopic=null;
+  function loadTopic(name) {
+    const fullName = name;
+    currentTopic = fullName;
+    
+    document.getElementById('mainTitle').textContent = name;
+    document.getElementById('defaultBanner').style.display = 'none';
+    document.getElementById('subtitle').style.display = 'none';
+
+    const desc = descriptions[fullName] || 'Overview: ' + fullName;
+    let info = document.querySelector('.info-banner.topic');
+    if (!info) {
+      info = document.createElement('div');
+      info.className = 'info-banner topic';
+      document.getElementById('tabButtons').before(info);
+    }
+    info.innerHTML = `<div style="margin-top:5px;color:#324b4b">${desc}</div>`;
+
+    // If it's a Practice Problem, show the problem table instead of Q&A tabs
+    if (problemTables[name]) {
+      document.getElementById('tabButtons').style.display = 'none';
+      document.getElementById('tabContent').style.display = 'block';
+      document.getElementById('tabContent').innerHTML = generateProblemTable(name);
+      return;
+    }
+
+    // otherwise show normal topic tabs
+    document.getElementById('tabButtons').style.display = 'flex';
+    document.getElementById('tabContent').style.display = 'block';
+    showTab('exercise');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.tab-btn[data-tab="exercise"]').classList.add('active');
+  }
+
+  window.showTab = function(tabName, btn) {
+    if (btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    const container = document.getElementById('tabContent');
+    container.innerHTML = '';
+    if (!currentTopic || !topics[currentTopic]) {
+      container.innerHTML = '<p>Select a topic to view questions.</p>';
+      return;
+    }
+
+    const list = topics[currentTopic][tabName] || [];
+    const title = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+    const h = document.createElement('h3');
+    h.textContent = title + ' Questions';
+    container.appendChild(h);
+
+    if (list.length === 0) {
+      const p = document.createElement('p');
+      p.textContent = 'No questions for this category.';
+      container.appendChild(p);
+      return;
+    }
+
+    const ul = document.createElement('ul');
+    list.forEach(q => {
+      const li = document.createElement('li');
+      li.textContent = q;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  };
+
+  /* ---------- UNIVERSAL SEARCH (All Sections) ---------- */
+  const searchInput = document.getElementById("searchBar");
+
+  const noResultsMsg = document.createElement("div");
+  noResultsMsg.textContent = "No results found";
+  noResultsMsg.style.color = "#ffb3b3";
+  noResultsMsg.style.fontSize = "13px";
+  noResultsMsg.style.fontWeight = "600";
+  noResultsMsg.style.marginTop = "8px";
+  noResultsMsg.style.textAlign = "center";
+  noResultsMsg.style.display = "none";
+  searchInput.insertAdjacentElement("afterend", noResultsMsg);
+
+  searchInput.addEventListener("input", () => {
+    const filter = searchInput.value.toLowerCase().trim();
+    const allTopics = document.querySelectorAll(".topicItem, .subtopicItem");
+    let found = false;
+
+    if (filter === "") {
+      allTopics.forEach(t => (t.style.display = "block"));
+      document.querySelectorAll(".section-content").forEach(sec => (sec.style.display = "none"));
+      noResultsMsg.style.display = "none";
+      return;
+    }
+
+    allTopics.forEach(topic => {
+      const match = topic.textContent.toLowerCase().includes(filter);
+      topic.style.display = match ? "block" : "none";
+      if (match) {
+        found = true;
+        const section = topic.closest(".section-content");
+        if (section) section.style.display = "block";
+      }
+    });
+
+    document.querySelectorAll(".section-content").forEach(section => {
+      const visible = Array.from(section.children).some(c => c.style.display === "block");
+      section.style.display = visible ? "block" : "none";
+    });
+
+    noResultsMsg.style.display = found ? "none" : "block";
+  });
+
+});
+</script>
+
+</body>
+</html>
